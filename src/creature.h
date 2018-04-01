@@ -38,7 +38,15 @@ public:
         x += vec.x;
         y += vec.y;
     }
+    
+    void set(int newx, int newy)
+    {
+        x = newx;
+        y = newy;
+    }
 };
+
+enum class PosStatus {INSIDE, TOP, BOTTOM, LEFT, RIGHT};
 
 class Creature
 {
@@ -54,10 +62,11 @@ public:
     bool alive = true; // when created it is true and it is public information (may need to make it private though)
     int age = 0;
     
-    void foo(){ return; }
-    
     
 private:
+    PosStatus checkBorders();
+    void decideNextMove();
+    
     float energy;
     const float cost; // energy consumption per turn
     const float speed; // speed parameter

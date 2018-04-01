@@ -3,7 +3,14 @@
 #include <iostream>
 
 Creature::Creature(float en, float cst, float spd, float left, float right) :
-  energy(en), cost(cst), speed(spd), goLeft(left), goRight(right), pos(200, 200), move(1, 0), eating(2*cost)
+  energy(en),
+  cost(cst),
+  speed(spd),
+  eating(2*cost),
+  goLeft(left),
+  goRight(right),
+  pos(200, 200),
+  move(1, 0)
 {
 }
 
@@ -28,13 +35,50 @@ void Creature::setEcoSys(Field* eco)
     ecosystem = eco;
 }
 
+PosStatus Creature::checkBorders()
+{
+    if ( pos.x == 0 )
+    {
+        return PosStatus::LEFT;
+    }
+    else if ( pos.x == ecosystem->maxX() - 1)
+    {
+        return PosStatus::RIGHT;
+    }
+    else if ( pos.y == 0)
+    {
+        return PosStatus::TOP;
+    }
+    else if ( pos.y == ecosystem->maxY() - 1)
+    {
+        return PosStatus::BOTTOM;
+    }
+    return PosStatus::INSIDE;
+}
+
+void Creature::decideNextMove()
+{
+    float decision = static_cast<float>((*Simulation::dist)(*Simulation::rng)) / 100.0;
+        
+        if(decision < goLeft)
+        {
+            move.left();
+        }
+        else if (decision > (1 - goRight))
+        {
+            move.right();
+        }
+}
+
+
+
 void Creature::live()
 {
     if (energy < 0)
     {
         // die
         alive = false;
-        std::cout << "I died at age of " << age <<"." << std::endl;
+        std::cout << "I died at age of " << age <<". (" << goLeft << ", " << goRight <<')' << std::endl;
         return;
     }
     else
@@ -45,7 +89,6 @@ void Creature::live()
         pos.add(move);
         
         
-        // WARNING it does not prevent leaving the board, just prevents calling stupid indexes
         if( pos.x >= 0 && pos.x < ecosystem->maxX()
             && pos.y >= 0 && pos.y < ecosystem->maxY())
         {
@@ -55,24 +98,30 @@ void Creature::live()
             
             ecosystem->decrease(pos.x, pos.y, meal); // take from the ecosystem
             energy += meal; // add to belly
-            
-            //std::cout << "Ate food at" << pos.x << ' ' << pos.y <<std::endl;
-            //std::cout << "I have this much energy: " << energy <<std::endl;
         }
         else
         {
-            std::cout << "Stuck on making move" << std::endl;
+            std::cout <<"I wandered off the board." << std::endl;
         }
         
-        float decision = static_cast<float>((*Simulation::dist)(*Simulation::rng)) / 100.0;
-        
-        if(decision < goLeft)
+        // Prevents creatures to go off the board.
+        switch(checkBorders())
         {
-            move.left();
-        }
-        else if (decision > (1 - goRight))
-        {
-            move.right();
+            case PosStatus::INSIDE:
+                decideNextMove();
+                break;
+            case PosStatus::TOP:
+                move.set(0, 1);
+                break;
+            case PosStatus::BOTTOM:
+                move.set(0, -1);
+                break;
+            case PosStatus::LEFT:
+                move.set(1, 0);
+                break;
+            case PosStatus::RIGHT:
+                move.set(-1, 0);
+                break;
         }
     }
 }

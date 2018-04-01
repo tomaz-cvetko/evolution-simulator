@@ -22,27 +22,13 @@ int main(int argc, char **argv) {
     
     // make test subjects
     std::vector<Creature*> fauna(100, nullptr);
-    fauna[0] = new Creature(&simField);
      
     for(auto& being : fauna)
     {
+        // allocate objects to pointers in the vector
         being = new Creature(&simField);
-//         being->setEcoSys(&simField);
     }
     
-//     Creature testOrg(10.0, 1.0, 1.0, 0.15, 0.05);
-//     testOrg.setEcoSys(&simField);
-    
-//     Creature* testOrg2 = nullptr;
-//     testOrg2 = new Creature(&simField);
-    
-    //Main loop flag
-    bool quit = false;
-
-    //Event handler
-    SDL_Event e;
-    
-    long int count = 0;
     
     for (int i=0; i < 2000; ++i)
     {
@@ -55,6 +41,14 @@ int main(int argc, char **argv) {
         }
     }
     
+    //SDL, visualisation part
+    //Main loop flag
+    bool quit = false;
+
+    //Event handler
+    SDL_Event e;
+    
+    long int count = 0;
     
     //Clear screen
     SDL_SetRenderDrawColor( globalRen, 0xFF, 0xFF, 0xFF, 0xFF );
@@ -74,6 +68,13 @@ int main(int argc, char **argv) {
             if( e.type == SDL_QUIT )
             {
                 quit = true;
+            }
+            else if( e.type == SDL_KEYDOWN)
+            {
+                if(e.key.keysym.sym == 'w' && e.key.keysym.mod & KMOD_LCTRL)
+                {
+                    quit = true;
+                }
             }
         }
         
